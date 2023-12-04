@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# result file
+*_result.ipynb
+
+# model state file
+*.pth
+*.pt

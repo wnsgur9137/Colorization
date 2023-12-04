@@ -1,0 +1,164 @@
+{
+  "main": {
+    "id": "1168f49055dc76dc",
+    "type": "split",
+    "children": [
+      {
+        "id": "3b5382144a2cb181",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "543685c7b6d1eb90",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "흑백 이미지를 컬러 이미지로.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "efbdda1afece2832",
+    "type": "split",
+    "children": [
+      {
+        "id": "4b2f67c904774c63",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c4103451ff62ef11",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "9950613a3c6d4287",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "4af45d2d87c6cb97",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "4b6f8488cfda1935",
+    "type": "split",
+    "children": [
+      {
+        "id": "305222274da248ea",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7c098fbaa4049398",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "흑백 이미지를 컬러 이미지로.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "90c9fc8966331824",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "흑백 이미지를 컬러 이미지로.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "7b262305114595bb",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "afd61c15051bc2c7",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "흑백 이미지를 컬러 이미지로.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "c4103451ff62ef11",
+  "lastOpenFiles": [
+    "Pasted image 20231204011809.png",
+    "Pasted image 20231204011728.png",
+    "Pasted image 20231204011643.png",
+    "Pasted image 20231204010754.png",
+    "Pasted image 20231204010029.png",
+    "흑백 이미지를 컬러 이미지로.md",
+    "blackwhite.jpg",
+    "Pasted image 20231204003210.png",
+    "Pasted image 20231204003203.png",
+    "Pasted image 20231203222134.png",
+    "Pasted image 20231203222132.png",
+    "Pasted image 20231203202933.png"
+  ]
+}
