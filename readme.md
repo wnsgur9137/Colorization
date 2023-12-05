@@ -657,16 +657,21 @@ loss_G: 7.71227
 
 결과
 
-input 흑백 이미지
-
 ![input](images/input.jpg)
 
-output 컬러로 변환된 이미지
+![output](images/result.png)
 
-![result](images/result.png)
+![input_flower](images/flower-blackwhite.jpg)
 
-Visual Studio Code로 본 이미지
-![result](images/result_2.png)
+![output_flower](images/result2.png)
+
+![input_tree](images/tree2_blackwhite.jpg)
+
+![output_tree](images/restul4.png)
+
+![input_son](images/son_blackwhite.jpg)
+
+![output_son](images/result6.png)
 
 머신러닝에 대해 프로젝트를 진행할 수 있을까라는 막막함이 앞섰던 프로젝트였다. 마지막 머신러닝 14주차 강의 때 GAN에 대해 수강을 하고, 흥미가 생겨 GAN을 이용한 프로젝트를 진행해 보았으면 했다.
 논문과 각종 자료들을 참고하여 모델을 구현 및 사용하였는데, 대부분 코드를 해석하느라 시간을 보낸 것 같았다. 하이퍼 파라미터 값들을 변경하면서 보다 좋은 학습을 할 수 있도록 하고 싶었지만, 값을 변경함에따라 결과과 굉장히 많이 변경되는 것을 알게 되었고, 머신러닝에 대해 새로운 지식을 습득한 것 같다는 느낌을 받은 프로젝트였다.
