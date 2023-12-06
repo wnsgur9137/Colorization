@@ -1,17 +1,19 @@
 COCO 이미지 데이터와 GAN과 PyTorch를 이용
 
-## RGB vs LAB
+<br>
+
+# RGB vs LAB
 
 RGB는
 색상 데이터가 포함된 이미지는 (높이, 너비, 색상) 배열로 나타난다. 이 데이터는 RGB 색 공간에서 색상을 나타내며, 각 픽셀에 대해 3개의 숫자가 있어 픽셀의 크기를 나타낸다.
 
-![rgb](images/rgb.png)
+![rgb](readme/rgb.png)
 
 LAB는 화소마다 세 개의 숫자를 갖지만, 이 숫자들은 다른 의미를 가진다.
 첫 번재 숫자 L은 각 화소의 '명도'를 나타낸다. L만을 이용해 시각화하면 흑백 이미지로 나타나게 된다.
 A와 B 채널은 각 화소가 녹색-적색과 황색-청색인지를 나타낸다.
 
-![lab](images/lab.png)
+![lab](readme/lab.png)
 
 해당 프로젝트에서는 RGB가 아닌 LAB를 사용하여 모델을 훈련시킨다.
 RGB를 이용하기 위해서는 먼저 이미지를 흑백 이미지로 변환하고, 세 가지의 조합을 이용해 학습해야하기에 LAB에 상대적으로 어렵게 된다.
@@ -25,7 +27,25 @@ RGB를 이용하기 위해서는 먼저 이미지를 흑백 이미지로 변환�
 
 학습에 필요한 이미지는 [COCO 데이터 셋](https://cocodataset.org/#home)의 이미지를 사용한다.
 1만여개의 이미지를 사용한다.
-## 1.1 - Loading Image Paths
+
+<br>
+
+# U-Net
+
+![U-Net](readme/U-Net.png)
+
+U-Net이란 이미지 분할 등의 작업을 위해 딥러닝에서 널리 사용되는 아키텍처 중 하나이다.
+
+U-Net은 이미지에서 의미 있는 부분을 추출하기 위한 인코더(Downsampling Path)와 추출된 특징을 기반으로 입력 이미지의 원래 크기로 복원하는 디코더(Upsampling Path)로 구성된다.
+
+### U-Net의 특징
+* 인코더(Downsampling Path): 입력 이미지를 다운샘플링하여 고수준의 특징을 추출하는 부분이다. 이 과정은 CNN(Convolutional Neural Network)을 사용하여 수행된다.
+* 디코더(Upsampling Path): 인코더에서 추출한 특징을 사용하여 입력 이미지의 원래 크기로 복원하는 부분이다. 인코더의 각 단계에서 추출된 특징과 결합한다.
+* 스킵 연결(Skip Connections): U-Net에서는 인코더의 각 단계에서 디코더로 정보를 전달하는 스킵 연결이 사용된다. 이는 네트워크가 추상적인 특징과 세부적인 특징 '모두'를 활용할 수 있도록 도와준다.
+
+<br>
+
+# 1.1 - Loading Image Paths
 ``` python
 import …
   
@@ -44,8 +64,9 @@ print(len(train_paths), len(val_paths))
 8000 2000
 ```
 
+<br>
 
-## 1.2 - Making Datasets and DataLoaders
+# 1.2 - Making Datasets and DataLoaders
 이후 데이터셋과 데이터로더를 생성한다.
 ``` python
 # PyTorch를 사용하여 컬러 이미지의 L 채널을 흑백으로 변환하고,  
@@ -81,7 +102,7 @@ class ColorizationDataset(Dataset):
     def __len__(self):  
         return len(self.paths)
 
-def make_dataloaders(batch_size=16, n_workers=4, pin_memory=True, **kwargs):  # 데이터로더를 생성하는 함수  
+def make_dataloaders(batch_size=16, n_workers=4, pin_memory=True, **kwargs):  # 미니배치를 사용하기 위해 데이터로더를 생성하는 함수  
     dataset = ColorizationDataset(**kwargs) # 주어진 매개변수를 이용해 데이터셋을 생성한다.  
     dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=n_workers,  
                             pin_memory=pin_memory) # 생성한 데이터셋으로 데이터로더를 생성한다.  
@@ -100,15 +121,63 @@ torch.Size([16, 1, 256, 256]) torch.Size([16, 2, 256, 256])
 500 125
 ```
 
+<br>
 
-## 1.3 - Generator proposed by the paper (GAN)
+# 1.3 - Generator proposed by the paper (GAN)
 GAN의 Generator로 사용될 U-Net을 구현한다. 이 부분에서 가장 중요한 것은 U-Net을 중간 부분에서 만들고, 입력 모듈과 출력 모듈에 도달할 때까지 반복할 때마다 중간 모듈의 왼쪽과 오른쪽에 다운 샘플링 및 업샘플링 모듈을 추가하는 것이다.
 
-![gan](images/gan.png)
+![gan](readme/gan.png)
 
 파란색 직사각형은 코드로 관련된 모듈을 구축하는 순서를 보여준다.
 프로잭트 내 코드상에서 구현된 계층은 8계층으로 구현되어있다.
 256x256 이미지로 시작하면 U-Net의 중간에서 1x1(256 / 2 8승) 이미지를 얻고 업샘플링하여 256x256 이미지 (2채널)을 생성한다.
+
+## Conv2d란?
+PyTorch에서 제공하는 2차원(Convolutional) 컨볼루션 레이어이다. 주로 이미지 처리와 관련된 딥러닝 모델에서 사용한다.
+커널 사이즈가 (4, 4)인 이유는 RGB인 3차원 이미지의 (3, 3)채널과 출력 채널을 합하여 (4, 4)가 된다.
+
+*스트라이드(stride)*
+
+스트라이드는 합성곱 연산(Convolutional Operation)에서 커널이 입력 데이터 위를 움직이는 간격을 말한다. 즉, 커널이 입력 데이터를 얼마나 건너뛰며 이동하는지 결정한다.
+
+*패딩(padding)*
+
+패딩은 입력 주변에 추가되는 제로 패딩의 크기이다. 이를 통해 출력 크기를 조절할 수 있다.
+
+## BatchNorm2d란?
+Batch Normalization은 신경망의 학습을 안정화하고 가속화하는 기술 중 하나이다. BatchNorm2d는 주로 2D 이미지 데이터에 대한 배치 정규화를 의미한다.
+Batch Normalization은 각 미니배치의 입력에 대해 정규화를 수행하여 네트워크의 안정성을 향상시키는 기술이다. 특히 각 층의 활성화 값을 정규화하여 학습 중에 발생하는 특성 분포의 변화를 줄이고, 그라디언트 소실 문제를 완화한다.
+주로 합성곱 신경망(Convolutional Neural Network, CNN)의 합성곱 층(Convolutional Layer) 뒤에 적용되며, 채널별로 각 배치에 대해 정규화를 수행한다. 즉, 각 채널의 입력에 대해 평균과 표준 편차를 계산하고, 정규화된 값을 scale과 shift를 통해 적절하게 변환한다.
+
+Batch Normalization의 이점
+
+1. 학습 속도를 향상시킨다.
+2. 초기 가중치에 덜 민감하게 한다.
+3. 오버피팅을 억제한다.
+4. 그라디언트 소실 문제를 완화한다.
+
+## LeakyReLU란?
+
+Leaky ReLU(Reaky Rectified Linear Unit)은 ReLU(Rectified Linear Unit)의 변형 중 하나로, 주로 인공 신경망의 활성화 함수로 사용된다. LeakyReLU는 음수 입력에 대해 약간의 기울기를 갖도록 설계되어있다.
+
+### 해당 프로젝트에서 LeakyReLU를 사용한 이유
+
+입력이 음수인 경우 작은 기울기르 가지게 되므로, 해당 부분에서 정보가 손실되지 않는다. 즉, 학습 도중 음수 입력으로 인해 항상 0을 출력하게 되면서 더 이상 업데이트 되지 않는 현상을 어느정도 해결할 수 있기 때문이다.
+
+## Tanh 활성화 함수란?
+Tanh(하이퍼볼릭 탄젠트)는 S자 형태의 곡선을 가지고 있는 활성화 함수이다.
+출력 범위는 -1에서 1까지이며, 입력이 양수면 1에 가까워지고 음수이면 -1에 가까워진다.
+중심은 0으로 입력이 0일 때 출력은 0이다. 이는 활성화 함수의 출력을 중앙으로 정렬하는데 도움이 된다.
+
+S자 형태의 곡선을 가지고 있어 비선형성을 추가하여 신경망이 복잡한 함수를 모델링할 수 있게 한다. 또한 그라디언트 소실 문제를 완화시켜주는데, 시그모이드 함수와 마찬기지로 중심이 0이기 때문이다.
+
+> 본 프로젝트에서는 outermost일 때 Tanh 활성화 함수를 사용하는데, 그 이유는 모델이 출력하는 이미지의 픽셀 값이 정해진 범위 내에 있도록 보장하기 위해서이다.
+
+## Dropout이란?
+신경망을 정규화(regularization)하는 기법 중 하나로, 훈련 중에 신경망의 일부 뉴런을 랜덤하게 선택해 "Dropout" 시키는 것이다. 이는 모델이 특정 뉴런에 고정되는 것을 방지하고, 여러 뉴런이 서로 독립적으로 학습되도록 만들어준다.
+
+Dropout을 적용함으로써 모델은 다양한 부분집합의 뉴런들에 대해 학습하게 되어 일반화 성능을 향상시킬 수 있다. 특히, 과적합(overfitting)을 방지하고 모델의 일반화 성능을 향상시키는데 효과적이다.
+
 
 ``` python
 # U-Net 구조에서 사용되는 각 블록을 정의하는 클래스  
@@ -130,6 +199,7 @@ class UnetBlock(nn.Module):
         upnorm = nn.BatchNorm2d(nf)  
   
         # outermost일 때는 업샘플링 후 Tanh 활성화 함수를 사용  
+        # outermost: U-Net 아키텍처의 가장 바깥쪽 레이어 (시작과 끝)
         if outermost:  
             upconv = nn.ConvTranspose2d(ni * 2, nf, kernel_size=4,  
                                         stride=2, padding=1)  
@@ -138,6 +208,7 @@ class UnetBlock(nn.Module):
             model = down + [submodule] + up  
   
         # innermost일 때는 업샘플링 후 BatchNorm 사용  
+        # innermost: U-Net 아키텍쳐아 가장 안쪽 레이어
         elif innermost:  
             upconv = nn.ConvTranspose2d(ni, nf, kernel_size=4,  
                                         stride=2, padding=1, bias=False)  
@@ -190,14 +261,64 @@ class Unet(nn.Module):
         return self.model(x)
 ```
 
-## 1.4 - Discriminator
+<br>
+
+# 1.4 - Discriminator
 이 코드는 Conv-BatchNorm-LackyReLU의 블록을 사용해 입력된 이미지가 가짜인지 실제인지 결정함으로써 모델을 구현한다.
 첫 번재와 마지막 블록은 정규화를 하지 않으며 마지막 블록은 활성화 함수가 없다.
+
+## 다운샘플링(downsampling)이란?
+
+타임 스탬프의 빈도를 늘리거나 줄이는 것을 말함.
+
+<br>
+
+> 다운샘플링을 하는 이유?
+
+1) 원본 데이터의 시간 단위가 실용적이지 않은 경우
+    * 너무 자주 측정하는 경우
+    * 추가로 데이터의 저장 공간 및 처리에 대한 부담을 더안아야 할 만큼 새로운 정보를 제공하지 않는 경우
+
+2) 데이터 주기의 특정 부분에 집중하는 경우
+    * 특정 주기만 보고 싶을 때에 해당하는 데이터만 추춢하는 다운샘플링이 이루어짐
+
+3) 더 낮은 빈도의 데이터에 맞추는 경우
+
+<br>
+<br>
+
+## 업샘플링(upsampling)이란?
+
+데이터가 실제보다 더 자주 수집된 것처럼 데이터를 표현하는 것
+업샘플링의 목적은 실제로 측정하는 것은 아니지만 드물게 측정된 데이터에서 더 조밀한 시간의 데이터를 얻기 위함
+
+<br>
+
+> 업샘플링이 이루어지는 경우
+
+1) 시계열이 불규칙적인 상황
+
+2) 입력이 서로 다른 빈도로 샘플링된 상황
+    * 서로 다른 빈도 데이터를 같은 시간대로 정렬하기 위해 업샘플링이 필요
+    * 사전관찰에 유의해야 한다. (지금까지 알려진 상태로만 추측해 업샘플링하는 경우에는 안전하다.)
+
+<br>
+
+## 해당 프로젝트에서 다운샘플링/업샘플링을 하는 이유
+
+입력한 사진에서 특정 명암에 따라 색상을 부여하려고 할 때 이미지의 특정 명암은 크기와 깊이가 각각 다양할 것이다. 사이즈가 다양한 이미지에서 찾기 힘든 경우가 발생할 수 있으므로 다양한 이미지 크기를 생성하고 학습하는 것이다.
+
+
 
 ``` python
 # PatchGan Discriminator를 정의하는 클래스  
 class PatchDiscriminator(nn.Module):  
     def __init__(self, input_c, num_filters=64, n_down=3):  
+        """
+        input_c: 입력 채널 수
+        num_filters: 각 Convolutional 레이어의 필터 수
+        n_down: 다운샘플링 레이어의 수로, 네트워크의 깊이를 결정
+        """
         super().__init__()  
   
         model = [self.get_layers(input_c, num_filters, norm=False)] # Discriminator 모델을 정의하기 위한 리스트  
@@ -211,6 +332,15 @@ class PatchDiscriminator(nn.Module):
   
     # Discriminator에서 사용되는 Convolutional 레이어를 생성하는 메서드  
     def get_layers(self, ni, nf, k=4, s=2, p=1, norm=True, act=True):  
+        """
+        ni: 입력 채널 수
+        nf: 출력 채널 수
+        k: 커널 크기
+        s: 스트라이드 값
+        p: 패딩 값
+        norm: Batch Normalization 사용 여부
+        act: Leaky ReLU Activation 사용 여부
+        """
         layers = [nn.Conv2d(ni, nf, k, s, p, bias=not norm)] # Convolutional 레이어 추가  
         if norm: layers += [nn.BatchNorm2d(nf)] # Batch Normalization 레이어 추가  
         if act: layers += [nn.LeakyReLU(0.2, True)] # Leaky ReLU Activation 레이어 추가  
@@ -251,6 +381,8 @@ PatchDiscriminator(
 )
 ```
 
+## Patch Discriminator
+
 Patach Discriminator
 모델은 입력된 이미지 전체가 진짜 혹은 가짜라고 생각하는 정도를 나타내는 숫자(스케일러)를 출력한다. 패치 Discriminator에서 모델은 입력된 이미지의 70x70 픽셀이라고 말할 수 있는 패치마다 하나의 숫자를 출력하고, 각각의 패치가 가짜인지 아닌지를 개별적으로 결정한다.
 이러한 모델을 색상화 작업에 사용하는 것은 모델이 변경해야 할 로컬 변경 사항이 매우 중요하기 때문에 전체 이미지를 결정하는 것은 이 작업의 세부 사항을 처리할 수 없기 때문이다.
@@ -262,8 +394,12 @@ out = discriminator(dummy_input) # 모델에 더미 입력을 전달하여 출�
 out.shape
 ```
 
-## 1.5 - GAN Loss
-최종 모델의 GAN loss을 계산하는 데 사용할 수 있는 클래스이다.
+<br>
+
+# 1.5 - GAN Loss
+
+GAN의 손실을 정의하는 클래스이다. GAN은 생성자(Generator)와 판별자(Discriminator)라는 두 개의 네트워크로 이루어져 있으며, 이 두 네트워크 간의 경쟁을 통해 데이터를 생성하고 판별하는 모델이다.
+
 어떤 종류의 loss을 사용할지를 결정하고, 일정한 텐서를 진짜 혹은 가짜 레이블로 등록한다.
 이 모듈을 호출하면 0 또는 1로 가득찬 적절한 텐서를 만들고 loss을 계산한다.
 ``` python
@@ -297,8 +433,6 @@ class GANLoss(nn.Module):
         return loss
 ```
 
-## 
-
 init에서는 이전에 정의한 함수와 클래스를 사용하여 Generator와 Discriminator를 정의하고 두 loss 함수와 Generator와 Discriminator의 최적화기를 정의한다.
 
 전체 작업은 이 클래스의 최적화 방법으로 수행되고 있다. 먼저 반복당 한 번씩 모듈의 순방향 방법을 호출하고 출력을 클래스의 fake_color 변수에 저장한다.
@@ -307,6 +441,11 @@ init에서는 이전에 정의한 함수와 클래스를 사용하여 Generator�
 가짜와 진짜의 두 loss을 합산하고 평균을 취한 다음 최종 loss에 대해 거꾸로 호출한다.
 
 backward_G 방법에서는 Discriminator에게 가짜 이미지를 제공하고 실제 레이블을 할당하여 적대적 loss을 계산하여 속이려고 한다. L1 loss도 사용하여 예측된 두 채널과 대상 두 채널 사이의 거리를 계산하고 이 loss에 계수를 곱하여 두 loss의 균형을 맞춘다.
+
+<br>
+
+# Main Model
+
 
 ``` python
 class MainModel(nn.Module):  
@@ -361,7 +500,7 @@ class MainModel(nn.Module):
         self.loss_D.backward()  
   
     # Generator를 역전파하여 GAN 및 L1 loss 계산하는 메서드   
-def backward_G(self):  
+    def backward_G(self):  
         fake_image = torch.cat([self.L, self.fake_color], dim=1)  
         fake_preds = self.net_D(fake_image)  
         self.loss_G_GAN = self.GANcriterion(fake_preds, True)  
@@ -390,7 +529,9 @@ def backward_G(self):
 model = MainModel()
 ```
 
-## 1.7 - Utility functions
+<br>
+
+# 1.7 - Utility functions
 시각화, loss 출력 등의 함수
 ``` python
 class AverageMeter:  
@@ -492,9 +633,9 @@ def log_results(loss_meter_dict): # 로그
         print(f"{loss_name}: {loss_meter.avg:.5f}")
 ```
 
+<br>
 
-
-## 1.8 - Training function
+# 1.8 - Training function
 
 ``` python
 def train_model(model, train_dl, epochs, display_every=200):  
@@ -516,34 +657,36 @@ def train_model(model, train_dl, epochs, display_every=200):
 train_model(model, train_dl, 100) # 모델 훈련 함수 호출
 ```
 
-# 결과
-
+### 모델의 학습된 가중치를 저장
 ``` python
-import PIL  
-  
-model = MainModel()  
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  
-device = torch.device("mps:0" if torch.backends.mps.is_available() else "cpu")  
-model.load_state_dict(  
-    torch.load(  
-        "trained_model.pth",  
-        map_location=device  
-    )  
-)  
-path = "blackwhite.jpg"  
-img = PIL.Image.open(path)  
-img = img.resize((256, 256))  
-# to make it between -1 and 1  
-img = transforms.ToTensor()(img)[:1] * 2. - 1.  
-model.eval()  
-with torch.no_grad():  
-    preds = model.net_G(img.unsqueeze(0).to(device))  
-colorized = lab_to_rgb(img.unsqueeze(0), preds.cpu())[0]  
-plt.imshow(colorized)
+torch.save(model.state_dict(), 'trained_model.pth')
 ```
+
 <br>
 
 # 성능
+
+## LeakyReLU
+
+LeakyReLU를 사용하여 입력이 음수인 경우 정보가 손실되지 않도록 하여 더 이상 업데이트 되지 않는 현상을 어느정도 해결한다.
+
+## Tanh
+
+U-Net 구조 중 outermost에서 Tanh를 사용하여 모델이 출력하는 이미지의 픽셀 값이 정해진 범위 내에 있도록 보장한다.
+
+## BatchNorm2d
+
+각 미니배치의 입력에 대해 정규화를 수행하여 네트워크의 안정성을 향상시킨다.
+
+각 층의 활성화 값을 정규화하여 학습 중에 발생하는 특성 분포의 변화를 줄이고, 그라디언트 소실 문제를 완화한다.
+
+## Dropout
+
+Dropout을 사용하여 모델이 특정 뉴런에 고정되는 것을 방지하고, 열 뉴런이 서로 독립적으로 학습되도록 만들어 주어 일반화 성능을 향상시킨다.
+
+과적합(overfitting)을 방지한다.
+
+# 학습
 
 학습을 진행한 하드웨어 스펙
 ```
@@ -573,7 +716,7 @@ loss_G_L1: 96.86528
 loss_G: 101.71611
 ```
 
-![1](images/1.png)
+![1](readme/1.png)
 
 <br>
 
@@ -592,7 +735,7 @@ loss_G_L1: 98.32729
 loss_G: 106.66600
 ```
 
-![2](images/2.png)
+![2](readme/2.png)
 
 <br>
 
@@ -612,7 +755,7 @@ loss_G_L1: 99.17970
 loss_G: 111.44044
 ```
 
-![3](images/3.png)
+![3](readme/3.png)
 
 <br>
 
@@ -631,7 +774,7 @@ loss_G_L1: 4.99254
 loss_G: 6.85187
 ```
 
-![4](images/4.png)
+![4](readme/4.png)
 
 <br>
 
@@ -651,27 +794,52 @@ loss_G_L1: 6.23062
 loss_G: 7.71227
 ```
 
-![5](images/5.png)
+![5](readme/5.png)
 
-<hr>
+<br>
 
-결과
+# 결과
 
-![input](images/input.jpg)
+``` python
+import PIL  
+  
+model = MainModel()  
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  
+device = torch.device("mps:0" if torch.backends.mps.is_available() else "cpu")  
+model.load_state_dict(  
+    torch.load(  
+        "trained_model.pth",  
+        map_location=device  
+    )  
+)  
+path = "blackwhite.jpg"  
+img = PIL.Image.open(path)  
+img = img.resize((256, 256))  
+# to make it between -1 and 1  
+img = transforms.ToTensor()(img)[:1] * 2. - 1.  
+model.eval()  
+with torch.no_grad():  
+    preds = model.net_G(img.unsqueeze(0).to(device))  
+colorized = lab_to_rgb(img.unsqueeze(0), preds.cpu())[0]  
+plt.imshow(colorized)
+```
+<br>
 
-![output](images/result.png)
+![input](readme/input.jpg)
 
-![input_flower](images/flower-blackwhite.jpg)
+![output](readme/result.png)
 
-![output_flower](images/result2.png)
+![input_flower](readme/flower-blackwhite.jpg)
 
-![input_tree](images/tree2_blackwhite.jpg)
+![output_flower](readme/result2.png)
 
-![output_tree](images/restul4.png)
+![input_tree](readme/tree2_blackwhite.jpg)
 
-![input_son](images/son_blackwhite.jpg)
+![output_tree](readme/restul4.png)
 
-![output_son](images/result6.png)
+![input_son](readme/son_blackwhite.jpg)
+
+![output_son](readme/result6.png)
 
 머신러닝에 대해 프로젝트를 진행할 수 있을까라는 막막함이 앞섰던 프로젝트였다. 마지막 머신러닝 14주차 강의 때 GAN에 대해 수강을 하고, 흥미가 생겨 GAN을 이용한 프로젝트를 진행해 보았으면 했다.
 논문과 각종 자료들을 참고하여 모델을 구현 및 사용하였는데, 대부분 코드를 해석하느라 시간을 보낸 것 같았다. 하이퍼 파라미터 값들을 변경하면서 보다 좋은 학습을 할 수 있도록 하고 싶었지만, 값을 변경함에따라 결과과 굉장히 많이 변경되는 것을 알게 되었고, 머신러닝에 대해 새로운 지식을 습득한 것 같다는 느낌을 받은 프로젝트였다.
